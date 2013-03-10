@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * @author Marika Ivanova
  */
-public class DijkstraSearch implements SearchIface {
+public class DijkstraSearch {
 
     // hashmap of distance from source to all vertices in the graph
     private HashMap<Node, Integer> distances;
@@ -69,7 +69,6 @@ public class DijkstraSearch implements SearchIface {
     }
     
     
-    @Override
     public Path search() {
         // initialize variables (unvisited, distances, parents)
         unvisited = new ArrayList<Node>();

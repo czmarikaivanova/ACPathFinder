@@ -23,11 +23,8 @@ import org.w3c.dom.Element;
  
 public class XMLWriter {
 
-    public void writeGraphToXML(Graph linkedGraph, ArrayList<Path> pathes, Properties prop) {
-        
-
+    public void writeGraphToXML(Graph linkedGraph, ArrayList<Path> pathes, Properties prop) {       
       try {
-
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 

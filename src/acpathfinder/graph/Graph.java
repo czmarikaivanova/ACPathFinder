@@ -3,7 +3,6 @@ package acpathfinder.graph;
 
 import acpathfinder.Entity;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
