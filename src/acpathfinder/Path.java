@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+// Path.java
+
 package acpathfinder;
 
 import acpathfinder.graph.Node;
