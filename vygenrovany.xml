@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<graphrec>
+    <solution id="1">
+        <scene bg="#ffffff">
+            <viewport x="-1.18921" y="-29.7302"/>
+            <matrix dx="0" dy="0" m11="1.68179" m12="0" m21="0" m22="1.68179"/>
+        </scene>
+        <graph>
+            <node bg="#ffaa00" bnd="#000000" fg="#000000" id="0"/>
+            <node bg="#ffaa00" bnd="#000000" fg="#000000" id="1"/>
+            <node bg="#ffaa00" bnd="#000000" fg="#000000" id="2"/>
+            <node bg="#ffaa00" bnd="#000000" fg="#000000" id="3"/>
+            <node bg="#ffaa00" bnd="#000000" fg="#000000" id="4"/>
+            <edge hgl="#00ffff" ln="#000000" n1="0" n2="1"/>
+            <edge hgl="#00ffff" ln="#000000" n1="1" n2="2"/>
+            <edge hgl="#00ffff" ln="#000000" n1="2" n2="3"/>
+            <edge hgl="#00ffff" ln="#000000" n1="3" n2="1"/>
+        </graph>
+        <scenario validator="multirobot"/>
+    </solution>
+</graphrec>
