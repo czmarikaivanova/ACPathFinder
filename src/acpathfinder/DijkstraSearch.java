@@ -25,27 +25,34 @@ public class DijkstraSearch {
     private Node source;
     // target node ID
     private Node target;
-    private int vertexCount;
+    private int nodeCount;
     
     private static final int INFINITY = 9999999;
-
-    
     private ArrayList<Path> foundPathes;
     
     public DijkstraSearch(Graph graph, Node source, Node target) {
         this.graph = graph;
         this.source = source;
         this.target = target;
-        this.vertexCount = graph.getVertexCount();
-        distances = new HashMap(vertexCount);
-        parents = new HashMap(vertexCount);
+        this.nodeCount = graph.getNodeCount();
+        distances = new HashMap(nodeCount);
+        parents = new HashMap(nodeCount);
     }
 
     public DijkstraSearch(Graph graph) {
         this.graph = graph;
-        this.vertexCount = graph.getVertexCount();
-        distances = new HashMap(vertexCount);
-        parents = new HashMap(vertexCount);
+        this.nodeCount = graph.getNodeCount();
+        distances = new HashMap(nodeCount);
+        parents = new HashMap(nodeCount);
+    }
+    
+    public DijkstraSearch(Graph graph, Entity entity) {
+        this.graph = graph;
+        source = entity.getActualNode();
+        target = entity.getSingleTarget();
+        nodeCount = graph.getNodeCount();
+        distances = new HashMap(nodeCount);
+        parents = new HashMap(nodeCount);        
     }
 
     public Node getSource() {
@@ -88,15 +95,19 @@ public class DijkstraSearch {
                 // i.e. there is no path from source to target
                 return null;
             }
-            // if we've already reached the target node, we can stop search
-            if (minNode.equals(target)) {
+            // if we've already reached the target node, we can stop searching
+            if (graph.areTheSame(minNode, target)) {
+                // IMPORTANT: target is now somewhere deeper in spatial graph - but indeed it represents the original target.
+                target = minNode;
                 return reconstructPath();
             }
             Set<Node> succesors = minNode.getSuccessors();
             for (Node s: succesors) {
                 // alternative distance
                 int alt = distanceToMinNode + 1; // TODO: later we'll consider general edge values
-                if (alt < distances.get(s) && !isOccupiedAtStep(alt, minNode)) {
+                boolean addednew = false; // if a new node was ad to the path. Otherwise we must stay
+                if (alt < distances.get(s)) {
+                    addednew = true;
                     distances.put(s, alt);
                     parents.put(s, minNode);
                 }
@@ -105,6 +116,7 @@ public class DijkstraSearch {
         return reconstructPath();
     }
     
+    // extrat a node with minimum distance
     private Node extractMin(ArrayList<Node> nodeList) {
         if (nodeList.isEmpty()) {
             throw new RuntimeException("Cannot extractMin from empty nodeList");
@@ -112,7 +124,7 @@ public class DijkstraSearch {
         // distance for the closest node
         int min = INFINITY; 
         Node closestNode = nodeList.get(0); // get first element
-        // current distance between source and actual noe
+        // current distance between source and actual node
         for (Node node: nodeList) {
             int dist = distances.get(node);
             if (dist < min) {
@@ -121,14 +133,14 @@ public class DijkstraSearch {
             }
         }
         nodeList.remove(closestNode);
-
         return closestNode;
     }
     
     /**
-     * private method to reconstruct finded path
+     * private method to reconstruct found path
      * It's used when search algorithm needs to return a path
-     * @return finded path (class that extends LinkedList<LinkedGraphNode>)
+     * It also set occupy at time step for certain vertices on the path.
+     * @return found path (class that extends LinkedList<LinkedGraphNode>)
      */
     private Path reconstructPath() {
         Path path = new Path(source.getId()); 
@@ -138,21 +150,23 @@ public class DijkstraSearch {
             node = parents.get(node);
         }
         //add source node
-        path.addFirst(node);
-        
+        path.addFirst(node);        
         return path;
     }
 
     private boolean isOccupiedAtStep(int step, Node node) {
-        if (foundPathes == null || foundPathes.isEmpty()) return false;
+        if (foundPathes == null || foundPathes.isEmpty()) {
+            return false;
+        }
         for (Path p: foundPathes) {
-            if (step >= p.size()) continue;
-            if (p.get(step).equals(node)) return true;
+            if (step >= p.size()) {
+                continue;
+            }
+            if (p.get(step).equals(node)) {
+                return true;
+            }
         }
         return false;
     }
-    
-
  
-    
 }

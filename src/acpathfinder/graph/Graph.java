@@ -2,6 +2,7 @@
 package acpathfinder.graph;
 
 import acpathfinder.Entity;
+import acpathfinder.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,23 +15,21 @@ import java.util.TreeMap;
  */
 public class Graph implements Iterable<Node> {
 
-    private Map<Integer, Node> nodes; // <nodeID, node>
-
-    /**
-     *
-     * @return
-     */
-    @Override
-    public Iterator<Node> iterator() {
-        return nodes.values().iterator();
-    }
     
+    protected Map<Integer, Node> nodes; // <nodeID, node>
+    protected int layerCount;
+    protected int nodesInLayer;
+    protected ArrayList<Entity> entities;
+
     /**
      * Graph Constructor. Creates graph with given number of nodes
      * @param nodeCount Number of vertices
      */
     public Graph(int nodeCount) {
         nodes = new TreeMap<Integer, Node>();
+        layerCount = 1;
+        entities = new ArrayList<Entity>();
+        nodesInLayer = nodeCount;
         for (int i = 0; i < nodeCount; i++) {
             nodes.put(i, new Node(i));
         }
@@ -57,6 +56,7 @@ public class Graph implements Iterable<Node> {
         addUnorientedEdge(from, to);
     }
 
+    
     /**
      * Removes edge. If multiple edges removes the first occurrence.
      * @param from vertex, the start of the edge
@@ -93,10 +93,17 @@ public class Graph implements Iterable<Node> {
      * Returns number of vertices fo the graph
      * @return number of vertices
      */
-    public int getVertexCount() {
+    public int getNodeCount() {
         return nodes.size();
     }
 
+    public int getLayerCount() {
+        return layerCount;
+    }
+    
+    public int getNodesInLayer() {
+        return nodesInLayer;
+    }
     /**
      * Returns number of edges in the graph
      * @return number of edges
@@ -121,10 +128,10 @@ public class Graph implements Iterable<Node> {
      */
     public void normalise(int width, int height) {
         // check if the parameters are consistent with vertex count of the graph
-        int nodeCount = width * height;
-        if (nodeCount != getVertexCount()) {
+        int nodeCnt = width * height;
+        if (nodeCnt != getNodeCount()) {
             throw new IllegalArgumentException("Parameters don't match vertex count " +
-                       "\n vertex count: " + nodeCount + 
+                       "\n vertex count: " + nodeCnt + 
                        "\n width: " + width + 
                        "\n height: " + height);
         }
@@ -149,27 +156,33 @@ public class Graph implements Iterable<Node> {
      * 
      * @param entities 
      */
-    public void addEntities(ArrayList<Entity> entities) {
-       for (Entity entity: entities) {
-            Node entityNode = entity.getActualNode();
-            entityNode.setEntity(entity);
-        } 
-    }
+//    public void addEntities(ArrayList<Entity> entities) {
+//       for (Entity entity: entities) {
+//            Node entityNode = entity.getActualNode();
+//            entityNode.setEntity(entity);
+//        } 
+//       this.entities = entities;
+//    }
     
+    public Entity getEntity(int nodeId) {
+        return findNodeById(nodeId).getEntity();
+    }
+
     /**
      * create entities (agents) in graph. Entities belongs to the desired teams
      * @param teamIDs IDs of team 
      * @param vertexIDs starting positions
      * @return 
      */
-    public ArrayList<Entity> insertEntities(int[] teamIDs, int[] vertexIDs) {
-        if (teamIDs.length != vertexIDs.length) {
+    public ArrayList<Entity> insertEntities(int[] teamIDs, int[] vertexIDs, int[] goalNodeIds) {
+        if (teamIDs.length != vertexIDs.length || teamIDs.length != goalNodeIds.length) {
             throw new IllegalArgumentException("Array sizes aren't equal!");
         }
         ArrayList<Entity> entityList = new ArrayList<Entity>();
         for(int i = 0; i < vertexIDs.length; i++) {
             Node entityNode = findNodeById(vertexIDs[i]);
-            Entity newEntity = new Entity(i, teamIDs[i], entityNode);
+            Node targetNode = findNodeById(goalNodeIds[i]);
+            Entity newEntity = new Entity(i, teamIDs[i], entityNode, targetNode);
             entityNode.setEntity(newEntity);
             entityList.add(newEntity);
         }
@@ -180,10 +193,26 @@ public class Graph implements Iterable<Node> {
         return nodes.get(nodeID);
     }
     
+    /**
+     * remove nodes by id.
+     * rename (change ID) remaining nodes, so their IDs are 0..number of nodes - 1
+     * reconstruct a new TreeMap of nodes
+     * @param nodeIDs array of node IDs
+     */
     public void removeNodesById(int[] nodeIDs) {
         for (int nodeID : nodeIDs) {
             removeNode(nodeID);
         }
+        Iterator iterator = iterator();
+        int i = 0; // new node ID
+        TreeMap<Integer, Node> newNodes = new TreeMap<Integer, Node>();
+        while (iterator.hasNext()) {
+            Node node = (Node) iterator.next();
+            node.setId(i);
+            newNodes.put(node.getId(), node);
+            i++;
+        }
+        nodes = newNodes;
     }
     
     /**
@@ -195,14 +224,16 @@ public class Graph implements Iterable<Node> {
     }
     
     /**
-     * Add goals to vertices
+     * Add goals to vertices. There is just information about team, not about
+     * the entity. Entity itself has exact node as goal (set of nodes)
      * @param teamID ID of team
      * @param indices indices of nodes, where the goals will be set
+     * 
+     * not more then one so far
      */
     public void addGoals(int teamID, int[] indices) {
         for (int nodeID : indices) {
-            Node node = findNodeById(nodeID);
-            node.setGoalTeamID(teamID);
+            findNodeById(nodeID).setGoalTeamID(teamID);
         }
     }
     
@@ -214,5 +245,26 @@ public class Graph implements Iterable<Node> {
     public boolean isNodeIdValid(Integer nodeId) {
         return nodes.containsKey(nodeId);
     }
-   
+    
+        // two nodes in spatial graph represents the same node, if they are in 
+    // one line (by edges)
+    public boolean areTheSame(Node n1, Node n2) {
+        return ((n1.getId() % nodesInLayer) == (n2.getId() % nodesInLayer));
+    }
+    
+    @Override
+    public Iterator<Node> iterator() {
+        return nodes.values().iterator();
+    }
+
+    public Path rearrangePath(Path path) {
+        Path rearrangedPath = new Path(path.getId());
+        for (Node node: path) {
+            int nodeId = node.getId();
+            Node nodeInOriginalGraph = findNodeById(nodeId % nodesInLayer);
+            rearrangedPath.addLast(nodeInOriginalGraph);
+        }
+        return rearrangedPath;
+    }
+    
 }

@@ -11,13 +11,18 @@ import java.util.TreeSet;
  * @author Marika Ivanova
  */
 public class Node implements Comparable<Node> {
+    private int NO_TEAM_GOAL = -1;
+    
+    private boolean reserved; // TODO: do we need it?
+    
     // Comparable is for Set<Node>
-
     private int id;
-    private Set<Node> successors;
+    private Set<Node> successors;    
     private Entity entity;
     private int goalTeamID;
 
+    // makespan size depends on the numer of nodes in the graph. 
+    // so this value is just temporary, for testing.
 
     /**
      * Constructor
@@ -25,8 +30,8 @@ public class Node implements Comparable<Node> {
      */
     public Node(int id) {
         this.id = id;
-        this.entity = null;
-        this.successors = new TreeSet<Node>();
+        entity = null;
+        successors = new TreeSet<Node>();
     }
 
     /**
@@ -35,13 +40,18 @@ public class Node implements Comparable<Node> {
     public int getId() {
         return id;
     }
-
+    
+    // set a new node ID.
+    void setId(int i) {
+        this.id = i;
+    }
     /**
      * @return the successors
      */
     public Set<Node> getSuccessors() {
         return successors;
     }
+
 
     /**
      * @return the entity
@@ -54,6 +64,10 @@ public class Node implements Comparable<Node> {
         return goalTeamID;
     }    
     
+    public boolean isReserved() {
+        return reserved;
+    }
+    
     /**
      * @param entity the entity to set
      */
@@ -63,6 +77,14 @@ public class Node implements Comparable<Node> {
 
     public void setGoalTeamID(int goalTeamID) {
         this.goalTeamID = goalTeamID;
+    }
+    
+    public void reserve() {
+        reserved = true;
+    }
+    
+    public void release() {
+        reserved = false;
     }
     
     @Override
@@ -75,5 +97,11 @@ public class Node implements Comparable<Node> {
     public int compareTo(Node t) {
         return (id - t.id); // for Comparable interface
     }
+    
+    public boolean isGoal() {
+        return goalTeamID != NO_TEAM_GOAL;
+    }
+
+
 
 }

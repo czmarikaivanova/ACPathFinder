@@ -3,6 +3,7 @@
 package acpathfinder;
 
 import acpathfinder.graph.Node;
+import java.util.ArrayList;
 
 /**
  *
@@ -13,11 +14,21 @@ public class Entity {
     private int agentID;
     private int teamID;
     private Node actualNode;
-
+    private ArrayList<Node> targets;    
+    
+    public Entity(int agentID, int teamID, Node actualNode, Node targetNode) {
+        this.agentID = agentID;
+        this.teamID = teamID;
+        this.actualNode = actualNode;
+        targets = new ArrayList<Node>();
+        targets.add(targetNode);
+    }
+    
     public Node getActualNode() {
         return actualNode;
     }
 
+    // A move. It is not used in search. But it will be used in simulations.
     public void setActualNodeID(Node actualNode) {
         this.actualNode = actualNode;
     }
@@ -38,10 +49,18 @@ public class Entity {
         this.teamID = teamID;
     }
 
-    public Entity(int agentID, int teamID, Node actualNode) {
-        this.agentID = agentID;
-        this.teamID = teamID;
-        this.actualNode = actualNode;
+
+    
+    // set a new goal - one node
+    public void setTarget(Node targetNode) {
+        targets.add(targetNode);
+    }
+    
+    public Node getSingleTarget() {
+        if ((targets != null) && (targets.size() > 0)) {
+            return targets.get(0);
+        }
+        return null;
     }
     
     @Override
