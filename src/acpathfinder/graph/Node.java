@@ -17,6 +17,7 @@ public class Node implements Comparable<Node> {
     
     // Comparable is for Set<Node>
     private int id;
+    private int layerId;
     private Set<Node> successors;    
     private Entity entity;
     private int goalTeamID;
@@ -44,6 +45,15 @@ public class Node implements Comparable<Node> {
     // set a new node ID.
     void setId(int i) {
         this.id = i;
+    }
+
+    // get ID of the layer that node belonggs to
+    public int getLayerId() {
+        return layerId;
+    }
+    
+    public void setLayerId(int layerId) {
+        this.layerId = layerId;
     }
     /**
      * @return the successors

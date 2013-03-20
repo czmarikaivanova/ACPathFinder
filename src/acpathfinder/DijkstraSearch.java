@@ -105,9 +105,7 @@ public class DijkstraSearch {
             for (Node s: succesors) {
                 // alternative distance
                 int alt = distanceToMinNode + 1; // TODO: later we'll consider general edge values
-                boolean addednew = false; // if a new node was ad to the path. Otherwise we must stay
                 if (alt < distances.get(s)) {
-                    addednew = true;
                     distances.put(s, alt);
                     parents.put(s, minNode);
                 }

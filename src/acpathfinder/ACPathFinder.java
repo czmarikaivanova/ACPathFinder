@@ -34,16 +34,16 @@ public class ACPathFinder {
         
        // XMLReader xmlReader = new XMLReader();
      //   LinkedGraph lg = xmlReader.createGraphFromXML();
-        Graph graph = new Graph(12);
-        graph.normalise(3,4);
+        Graph graph = new Graph(20);
+        graph.normalise(4,5);
         
-        int[] obstacles = {4};
+        int[] obstacles = {5,16, 11};
         graph.addObstacles(obstacles);
-        SpatialGraph spatialGraph = new SpatialGraph(graph,5);
+        SpatialGraph spatialGraph = new SpatialGraph(graph,9);
         
         int[] teamIDs = {1};
         int[] vertexIDs = {0};
-        int[] team1Goals = {7};
+        int[] team1Goals = {16};
         ArrayList<Entity> entities = spatialGraph.insertEntities(teamIDs,vertexIDs, team1Goals);
         //ArrayList<Entity> entities =   
         graph.insertEntities(teamIDs,vertexIDs, team1Goals);
