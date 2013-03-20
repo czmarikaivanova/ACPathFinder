@@ -34,8 +34,8 @@ public class ACPathFinder {
         
        // XMLReader xmlReader = new XMLReader();
      //   LinkedGraph lg = xmlReader.createGraphFromXML();
-        Graph graph = new Graph(9);
-        graph.normalise(3,3);
+        Graph graph = new Graph(12);
+        graph.normalise(3,4);
         
         int[] obstacles = {4};
         graph.addObstacles(obstacles);

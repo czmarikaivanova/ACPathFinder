@@ -221,6 +221,7 @@ public class Graph implements Iterable<Node> {
      */
     public void addObstacles(int[] obstacleNodeIDs) {
         removeNodesById(obstacleNodeIDs);
+        nodesInLayer -= obstacleNodeIDs.length;
     }
     
     /**
