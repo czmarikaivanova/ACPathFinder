@@ -10,6 +10,10 @@ import java.util.Set;
 /**
  *
  * @author Marika Ivanova
+ * Performs a Dijkstra search for given graph, source and target.
+ * The search procedure is executed for every entity and the nodes included in
+ * the found path are reserved. Thus the order has a significant role, since the 
+ * solution can be lost, when the order of agents is wrongly selected.
  */
 public class DijkstraSearch {
 
@@ -80,9 +84,11 @@ public class DijkstraSearch {
         // initialize variables (unvisited, distances, parents)
         unvisited = new ArrayList<Node>();
         for (Node node : graph) {
-            unvisited.add(node);
-            distances.put(node, INFINITY); 
-            parents.put(node, null);
+            if (!node.isReserved()) { // if the node is not a parto some path of other agent
+                unvisited.add(node);
+                distances.put(node, INFINITY); 
+                parents.put(node, null);
+            }
         }
         
         distances.put(source, 0);
@@ -103,11 +109,13 @@ public class DijkstraSearch {
             }
             Set<Node> succesors = minNode.getSuccessors();
             for (Node s: succesors) {
-                // alternative distance
-                int alt = distanceToMinNode + 1; // TODO: later we'll consider general edge values
-                if (alt < distances.get(s)) {
-                    distances.put(s, alt);
-                    parents.put(s, minNode);
+                if (!isCrossing(s, minNode)) {
+                    // alternative distance
+                    int alt = distanceToMinNode + 1; // TODO: later we'll consider general edge values
+                    if (alt < distances.get(s)) {
+                        distances.put(s, alt);
+                        parents.put(s, minNode);
+                    }
                 }
             }
         }
@@ -143,8 +151,11 @@ public class DijkstraSearch {
     private Path reconstructPath() {
         Path path = new Path(source.getId()); 
         Node node = target;
+        source.reserve(path.getId());
         while (!node.equals(source)) {
+            
             path.addFirst(node);
+            node.reserve(path.getId());
             node = parents.get(node);
         }
         //add source node
@@ -152,17 +163,18 @@ public class DijkstraSearch {
         return path;
     }
 
-    private boolean isOccupiedAtStep(int step, Node node) {
-        if (foundPathes == null || foundPathes.isEmpty()) {
+    private boolean isCrossing(Node s, Node minNode) {
+        int sid = s.getId();
+        int mid = minNode.getId();
+        int nodesInLayer = graph.getNodesInLayer();
+        Node preS = graph.findNodeById(sid - nodesInLayer);
+        Node postMin = graph.findNodeById(mid + nodesInLayer);
+        if (!preS.isReserved() || !postMin.isReserved()) {
             return false;
         }
-        for (Path p: foundPathes) {
-            if (step >= p.size()) {
-                continue;
-            }
-            if (p.get(step).equals(node)) {
-                return true;
-            }
+        // some other entity from s will come to minNode
+        if (preS.getReservationId() == postMin.getReservationId()) {
+            return true;
         }
         return false;
     }

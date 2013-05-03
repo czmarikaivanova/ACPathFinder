@@ -65,6 +65,6 @@ public class Entity {
     
     @Override
     public String toString() {
-        return "AgentID: " + agentID + "; TeamID: " +teamID + "; Position: " + actualNode.getId();
+        return "AgentID: " + agentID + "\n TeamID: " +teamID + "\n Position: " + actualNode.getId() + "\n targetNode: " + getSingleTarget();
     }
 }

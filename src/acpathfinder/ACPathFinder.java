@@ -2,6 +2,7 @@
 package acpathfinder;
 
 import acpathfinder.graph.Graph;
+import acpathfinder.graph.SpatialGraph;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,29 +35,36 @@ public class ACPathFinder {
         
        // XMLReader xmlReader = new XMLReader();
      //   LinkedGraph lg = xmlReader.createGraphFromXML();
-        Graph graph = new Graph(20);
-        graph.normalise(4,5);
+        Graph graph = new Graph(9);
+        graph.connect4(3,3);
         
-        int[] obstacles = {5,16, 11};
+        int[] obstacles = {};
         graph.addObstacles(obstacles);
-        SpatialGraph spatialGraph = new SpatialGraph(graph,9);
         
         int[] teamIDs = {1};
         int[] vertexIDs = {0};
-        int[] team1Goals = {16};
-        ArrayList<Entity> entities = spatialGraph.insertEntities(teamIDs,vertexIDs, team1Goals);
+        int[] team1Goals = {9};
+
+        
         //ArrayList<Entity> entities =   
         graph.insertEntities(teamIDs,vertexIDs, team1Goals);
         
+        
         graph.addGoals(TEAM1_ID, team1Goals);
-        spatialGraph.addGoals(TEAM1_ID, team1Goals);
+        
+        SpatialGraph spatialGraph = new SpatialGraph(graph,graph.getNodeCount());
+        ArrayList<Entity> entities = spatialGraph.insertEntities(teamIDs,vertexIDs, team1Goals);
+        //spatialGraph.addGoals(TEAM1_ID, team1Goals);
+      
 
         // simulation of 3rd dimension in search. The agents make a plan and all others
         // must take it into account.
         // TODO: perhaps it would be better store entity as a value,insted of just
         ArrayList<Path> pathes = new ArrayList<Path>();
+
         DijkstraSearch ds = new DijkstraSearch(spatialGraph);
         //DijkstraSearch ds = new DijkstraSearch(graph);
+        
         int i = 0;
         for (Entity entity : entities) {
             ds.setFoundPathes(pathes);
@@ -65,6 +73,11 @@ public class ACPathFinder {
             i++;
             Path path = ds.search();
             if (path != null) {
+                // if newly found path exceeds the number of layers,
+                // the spatial graph should be augnmented by the difference
+                if (path.size() > spatialGraph.getLayerCount()) {
+                    spatialGraph.augment(path.size() - spatialGraph.getLayerCount());
+                }
                 // rearange path for original graph
                 // if it was already path in original graph, it will not be changed.
                 // otherwise the path made in spatial graph will be adjusted to original.
@@ -88,7 +101,4 @@ public class ACPathFinder {
 //        }
     }    
 
-    
-
-    
 }
